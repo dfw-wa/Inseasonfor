@@ -61,6 +61,9 @@ forecast_season<-chk_season(pred_date)
   }
 
 
+
+
+
   if(sdate<=pred_date){
     new_dat<-data.frame()
     for (i in seq.Date(from=sdate,to=pred_date,by=1)){
@@ -95,18 +98,23 @@ print(i)
          ){
 
       #ARIMA
-      ARIMA_for<-do_salmonForecasting_fun(fish_river_ocean_i,cov_vec=c("log_cum_cnt","cnt_by_flow"))
+      # ARIMA_for<-do_salmonForecasting_fun(fish_river_ocean_i,cov_vec=c("log_cum_cnt","cnt_by_flow"))
       #
       #   #DLM
         DLM_for<-do_sibregresr_fun(fish_river_ocean_i,cov_vec=c("log_cum_cnt","cnt_by_flow"))
       #Joint_like
       # joint_likelihood_fit1<-fit_joint_likelihood(fish_river_ocean_i,forecast = forecast,forecast_log_sd = forecast_log_sd)
+      #
+       if(morph==""){
         joint_likelihood_fit2<-fit_joint_likelihood2(fish_river_ocean_i ,ifelse(morph=="",forecast_season,morph))
+       }else{
+         joint_likelihood_fit2<-data.frame()
+       }
 
       #combined
       comb_for<-   dplyr::bind_rows(
         DLM_for,
-      ARIMA_for,
+      # ARIMA_for,
       # joint_likelihood_fit1,
       joint_likelihood_fit2
       ) |>
@@ -214,21 +222,21 @@ do_sibregresr_fun<-function(data,cov_vec=c("log_cum_cnt","cnt_by_flow")){#,"temp
 
   pen_dlm_forecast_cov<-sibregresr::forecast_fun(
     df = sib_reg_dat,
-    include = c("PenDlm"),
+    include = c("r2d2DLM"),
     transformation = log,
     inverse_transformation = exp,
     scale_x = TRUE,
     scale_y = TRUE,
     perf_yrs = 15,
     wt_yrs = 1,
-    covariates = sib_reg_cov,
-    penDLM_formula =formula(paste(c("y ~ x" , cov_vec),collapse=" + "))
+    covariates = sib_reg_cov ,
+    form =formula(paste(c("y ~ x" , cov_vec),collapse=" + "))
   )
 
-  sibregresr::make_table(pen_dlm_forecast_cov$forecasts,"PenDlm")
+  # sibregresr::make_table(pen_dlm_forecast_cov$forecasts,"r2d2Dlm")
 
 
-  forecast<-pen_dlm_forecast_cov$forecasts |> dplyr::filter(Age=="4",ReturnYear==max(ReturnYear),model_name=="PenDlm") |>
+  forecast<-pen_dlm_forecast_cov$forecasts |> dplyr::filter(Age=="4",ReturnYear==max(ReturnYear),model_name=="r2d2DLM") |>
     dplyr::ungroup() |>
     dplyr::mutate(`Lo 95`=exp(qnorm(.025,log(Pred),log_sd)),
                   `Lo 50`=exp(qnorm(.25,log(Pred),log_sd)),
