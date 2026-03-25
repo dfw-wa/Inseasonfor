@@ -68,7 +68,7 @@ current_year_cnts_plot<-function(env_dat,Bon_ch_year,cur_yr){
 percent_complete<-function(Bon_ch,f_yr,forecastdate){
   p<-
     Bon_ch |> dplyr::filter(dplyr::between(year,f_yr-15,f_yr-1)) |> dplyr::mutate(date=(as.Date(paste(f_yr,month,mday,sep="-")))) |>
-    dplyr::filter(month>=4) |>
+    dplyr::filter(month>=3) |>
     ggplot2::ggplot(ggplot2::aes(x=date,y=prop))+ggplot2::geom_vline(ggplot2::aes(xintercept = forecastdate),col="firebrick",lty=2,lwd=1)+ggplot2::geom_boxplot(ggplot2::aes(group = date))+ ggplot2::scale_x_date(
       date_breaks = "1 month",
       date_labels = "%b"
@@ -84,10 +84,10 @@ percent_complete<-function(Bon_ch,f_yr,forecastdate){
 
 
 
-prediction_error<-function(Bon_ch_year){
+prediction_error<-function(Bon_ch_year,line_date){
   p<-
     Bon_ch_year |>
-    dplyr::filter(month>=4) |> ggplot2::ggplot(ggplot2::aes(y = (MAPE_10yr),x=CountDate))+ggplot2::geom_col(fill="grey10")+ggplot2::geom_vline(ggplot2::aes(xintercept = forecastdate),col="firebrick",lty=2,lwd=1,alpha=.5)+ggplot2::ylab("Mean absolute percent error (MAPE)") + ggplot2::scale_y_continuous(labels = scales::unit_format(suffix="%",scale = 100))+ggplot2::theme_grey()+ggplot2::theme(axis.title.x = ggplot2::element_blank(),text = ggplot2::element_text(size=18))
+    dplyr::filter(month>=3) |> ggplot2::ggplot(ggplot2::aes(y = (MAPE_10yr),x=CountDate))+ggplot2::geom_col(fill="grey10")+ggplot2::geom_vline(ggplot2::aes(xintercept = line_date),col="firebrick",lty=2,lwd=1,alpha=.5)+ggplot2::ylab("Mean absolute percent error (MAPE)") + ggplot2::scale_y_continuous(labels = scales::unit_format(suffix="%",scale = 100))+ggplot2::theme_grey()+ggplot2::theme(axis.title.x = ggplot2::element_blank(),text = ggplot2::element_text(size=18))
 
   print(p)
 
@@ -118,7 +118,7 @@ cat("###### Percent complete","\n\n")
 cat("\n\n")
 
 cat("###### Prediction error","\n\n")
-(prediction_error(Bon_ch_year))
+(prediction_error(Bon_ch_year,forecastdate))
 
 cat("##### {-}","\n\n")
 
