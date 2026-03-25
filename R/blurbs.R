@@ -22,7 +22,7 @@ inital_blurb_fun<-function(Bon_ch_day,season_dates,morph){
       format(round(Bon_ch_day$total), scientific = FALSE, big.mark = ","),
       paste0((forecast_year - 10), "--", (forecast_year - 1)),
       format(forecastdate, "%B %d"),
-      round(Bon_ch_day$Ave_10yr * 100, 1),
+      sprintf("%.2f",Bon_ch_day$Ave_10yr * 100),
       forecast_season,
       chk_season_print(forecast_season, season_dates),
       format(round(Bon_ch_day$pred_Ave_10yr), scientific = FALSE, big.mark = ","),
