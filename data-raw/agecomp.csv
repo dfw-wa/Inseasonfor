@@ -19,6 +19,7 @@ Year,Type,Age 3,Age 4,Age 5,Age 6,TotalAdults,TotalAll,one_ocean_prop,Season
 2022,Bonn Dam,"23,957","160,839","12,580",318,"173,737","197,694",0.925761352,spring
 2023,Bonn Dam,"12,825","120,852","15,371",563,"136,786","149,611",0.88351147,spring
 2024,Bonn Dam,,,,,,,0.862,spring
+2025,Bonn Dam,,,,,,,0.7878,spring
 2005,Bonn Dam,,,,,,,0.253,summer
 2006,Bonn Dam,,,,,,,0.156,summer
 2007,Bonn Dam,,,,,,,0.313,summer
@@ -39,6 +40,7 @@ Year,Type,Age 3,Age 4,Age 5,Age 6,TotalAdults,TotalAll,one_ocean_prop,Season
 2022,Bonn Dam,,,,,,,0.683,summer
 2023,Bonn Dam,,,,,,,0.433,summer
 2024,Bonn Dam,,,,,,,0.406,summer
+2025,Bonn Dam,,,,,,,0.53,summer
 2005,Bonn Dam,,,,,,,0.24518527,Bright
 2006,Bonn Dam,,,,,,,0.218754563,Bright
 2007,Bonn Dam,,,,,,,0.224351709,Bright

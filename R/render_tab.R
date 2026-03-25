@@ -18,7 +18,7 @@ if(morph=="Tule"){
   for_year<-lubridate::year(pred_date)
   Bon_ch<-Bon_ch_fun(pred_date,counts2)
   Bon_ch_year<-Bon_ch |> dplyr::filter(year==for_year)|>
-    dplyr::filter(month>=3) |>
+    dplyr::filter(month>=2) |>
     dplyr::mutate(
     AdultChinook=ifelse(CountDate>pred_date,NA_real_,AdultChinook),
 )

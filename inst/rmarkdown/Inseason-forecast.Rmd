@@ -82,11 +82,6 @@ flow_temp_dat <- retry_get_data(
 
 flow_temp_dat<-flow_temp_dat|> flow_ema_fun()
 
-# Fall split counts
-Fall_split_cnts <- retry_get_data(
-  quote(tule_bright_split(forecastdate)),
-  name = "Fall split counts"
-)
 
 
 ```
@@ -123,10 +118,6 @@ for (season_i in c("spring","summer","fall")){#
   ## leave date as is but do not run plotting functions, only blurb. Another option would be to show last years' results in this case. 
   
   
-  
-  
-  
-  
   cat("## ",season_i,ifelse(season_i==forecast_season,"{.active}",""),"\n\n")
   
   
@@ -142,6 +133,12 @@ for (season_i in c("spring","summer","fall")){#
     #set date to last day of previous year
    forecastdate_i<-seas_end<- (season_dates |> dplyr::filter(season==season_i) |> 
                dplyr::select(end_m, end_md) |> paste(collapse=" ") |> paste((forecast_year-1),collapse=",") |> lubridate::mdy())
+   
+   #change season start and end
+   lubridate::year(seas_start)<-(forecast_year-1)
+   lubridate::year(seas_end)<-(forecast_year-1)
+   
+   
     
   } #else {
     
@@ -149,6 +146,13 @@ for (season_i in c("spring","summer","fall")){#
     #  if(forecastdate_i<=forecastdate){
     #    
     if(season_i=="fall"){
+      
+      # Fall split counts
+Fall_split_cnts <- retry_get_data(
+  quote(tule_bright_split(forecastdate_i)),
+  name = "Fall split counts"
+)
+
       
       cat("During the fall season, we partition  adult Chinook counts into bright adults, tule adults, and tule stubbies based on a visual assessment of the number of fish of each class passing the dam during two hours of the day. These visual assignments are subject to error and are a tool for inseason forecasting but not post-season run reconstruction. The predictions below are based on these visual assesments.","\n\n")
       
