@@ -49,9 +49,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-renv-
 
-      # 4.1. Cache R packages managed by renv
+      # 4.1. Set GITHUB_PAT for renv using the built-in GitHub Actions token
       - name: Set GITHUB_PAT for renv
-        run: echo "GITHUB_PAT=${{ secrets.GH_PAT }}" >> $GITHUB_ENV
+        run: echo "GITHUB_PAT=${{ github.token }}" >> $GITHUB_ENV
 
 
       # 5. Install renv and restore environment
