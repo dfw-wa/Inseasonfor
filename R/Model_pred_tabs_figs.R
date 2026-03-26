@@ -151,7 +151,7 @@ mod_wrapper_fun<-function(pred_date,Bon_cnts,flow_temp_dat,#ocean_cov,
 
 ####### DLM
 
-This is a penalized dynamic linear model fit with the [`Sibregresr` package](https://dfw-fp.github.io/sibregresr/articles/Overview.html). The coefficients are the:
+This is a penalized dynamic linear model fit with the [`Sibregresr` package](https://dfw-wa.github.io/sibregresr/articles/Overview.html). The coefficients are the:
 
 1)  log-transformed total count of jacks at Bonneville Dam in the *previous* year,
 2)  log-transformed cumulative adult count at Bonneville Dam in the *current* year,
