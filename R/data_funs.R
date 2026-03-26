@@ -70,6 +70,12 @@ bon_dat_fun <- function(pred_date = NULL,
     edate <- pred_date
   }
 
+
+  if(edate>=sdate){
+    return(past_bon_cnts)
+  }else{
+
+
   full_url <- glue::glue("{url}_salmon_getresults.php?dam=BON&sdate={sdate}&edate={edate}")
   gh_log("notice", "Checking URL: ", full_url)
 
@@ -118,6 +124,7 @@ bon_dat_fun <- function(pred_date = NULL,
   )
 
   dplyr::bind_rows(past_bon_cnts, new_dat)
+  }
 }
 
 
@@ -223,11 +230,16 @@ get_usace_flow_temp_data <- function(forecastdate,startdate,dam="BON") {
     "&enddate=", end_str
   )
 
+  gh_log("notice", "Fetching USACE data from: ", url)
+
+  resp <- httr2::request(url) |>
+    httr2::req_headers(`User-Agent` = "R/httr2 Inseasonfor-bot") |>
+    httr2::req_timeout(120) |>
+    httr2::req_retry(max_tries = 3, backoff = ~60) |>
+    httr2::req_perform()
 
   readr::read_csv(
-    file=url,
-
-    # Rename columns, skip 1st row so the old colnames aren't put into the df
+    I(httr2::resp_body_string(resp)),
     col_names = c("date", "kcfs","temp"),
     col_types = readr::cols(date = readr::col_datetime("%d-%b-%Y %H:%M"),
                             kcfs = readr::col_double(),
@@ -287,6 +299,12 @@ get_flow_data<-function(forecastdate=NULL,
     edate<-forecastdate
   }
 
+  if(
+    sdate>=edate
+  ){
+    return(flow_file)
+  }else{
+
   # if(edate>=sdate){
     #obtain the data from multile web sources
     ##usgs
@@ -327,6 +345,7 @@ return(flow_file |>
   # else{
   #   return(local_data |> flow_ema_fun())
   # }
+  }
 }
 
 
@@ -472,7 +491,7 @@ cnts_for_mod_fun<-function(forecastdate,Bon_cnts){
 }
 
 
-retry_get_data <- function(expr, max_tries = 4, name = "data", wait_sec = 120) {
+retry_get_data <- function(expr, max_tries = 1, name = "data", wait_sec = 30) {
   num_tries <- 0
   result <- NULL
 

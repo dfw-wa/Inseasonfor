@@ -1,6 +1,6 @@
 ## code to prepare `ladder_cnts_historic` dataset
 
-cur_date<-lubridate::today()
+cur_date<-lubridate::today()-5
 cur_year<-lubridate::year(cur_date)
 
 ladder_cnts<-fpc_laddersplit(cur_date,

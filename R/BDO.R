@@ -85,6 +85,7 @@ fpc_laddersplit<-function (pred_date=NULL,
 
 
 tule_bright_split<-function(pred_date){
+
   BDO_dat_obs<-BDO_dat()
 
 
@@ -112,7 +113,7 @@ tule_bright_split<-function(pred_date){
       mday=lubridate::mday(.data$CountDate)
     ) |>
     dplyr::filter(dplyr::between(month,8,11)) |>
-    dplyr::left_join(BDO_dat_obs,relationship="one-to-one") |>
+    dplyr::left_join(BDO_dat_obs) |>
     dplyr::group_by(year,Ladder) |>
     dplyr::arrange(CountDate) |>
     dplyr::mutate(
