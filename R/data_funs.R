@@ -472,7 +472,7 @@ cnts_for_mod_fun<-function(forecastdate,Bon_cnts){
 }
 
 
-retry_get_data <- function(expr, max_tries = 6, name = "data", wait_sec = 600) {
+retry_get_data <- function(expr, max_tries = 4, name = "data", wait_sec = 120) {
   num_tries <- 0
   result <- NULL
 
