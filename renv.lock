@@ -5081,8 +5081,8 @@
       "Encoding": "UTF-8",
       "Roxygen": "list(markdown = TRUE)",
       "RoxygenNote": "7.3.1",
-      "URL": "https://github.com/wdfw-fp/sibregresr, https://wdfw-fp.github.io/sibregresr/",
-      "BugReports": "https://github.com/wdfw-fp/sibregresr/issues",
+      "URL": "https://github.com/dfw-fp/sibregresr, https://dfw-fp.github.io/sibregresr/",
+      "BugReports": "https://github.com/dfw-fp/sibregresr/issues",
       "Imports": [
         "dlm",
         "dplyr",
@@ -5115,7 +5115,7 @@
       "Maintainer": "Mark Sorel <mark.sorel@dfw.wa.gov>",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
-      "RemoteUsername": "wdfw-fp",
+      "RemoteUsername": "dfw-fp",
       "RemoteRepo": "sibregresr",
       "RemoteRef": "main",
       "RemoteSha": "e6b5166ee8f1dd12fc4dfcc4ef6b055452d6310f"

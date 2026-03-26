@@ -33,7 +33,7 @@ Imports:
     vroom,
     zoo
 Remotes: 
-    wdfw-fp/sibregresr,
+    dfw-fp/sibregresr,
     wdfw-fp/salmonforecast
 Depends: 
     R (>= 3.5)

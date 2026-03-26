@@ -217,6 +217,6 @@ Data from **test fishing** is available [here](https://wdfw.wa.gov/fishing/manag
 
 A plethora of information including pre-season **forecasts and fact sheet** with catch updates is available [here](https://wdfw.wa.gov/fishing/management/columbia-river/compact). Note that pre-season forecasts are generally of an index of abundance that includes the Bonneville Dam counts and harvest below Bonneville Dam, so a greater number than what is being predicted here.
 
-**Code** used to generate predictions and render website is available [here](https://github.com/wdfw-fp/Inseasonfor)
+**Code** used to generate predictions and render website is available [here](https://github.com/dfw-fp/Inseasonfor)
 
 
