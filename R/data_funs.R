@@ -71,7 +71,7 @@ bon_dat_fun <- function(pred_date = NULL,
   }
 
 
-  if(edate>=sdate){
+  if(sdate>=edate){
     return(past_bon_cnts)
   }else{
 
