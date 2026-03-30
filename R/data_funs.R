@@ -234,6 +234,7 @@ get_usace_flow_temp_data <- function(forecastdate,startdate,dam="BON") {
 
   resp <- httr2::request(url) |>
     httr2::req_headers(`User-Agent` = "R/httr2 Inseasonfor-bot") |>
+    httr2::req_options(ssl_verifypeer = 0) |>
     httr2::req_timeout(120) |>
     httr2::req_retry(max_tries = 3, backoff = ~60) |>
     httr2::req_perform()
