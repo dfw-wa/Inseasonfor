@@ -21,7 +21,7 @@ mod_results<-function(pred_date,
   # if (is.null(mod_result_file)) {
   #   mod_result_file <- get_default_model_result_path()
   # }
-
+# browser()
 file_path<-system.file("data-cache/forecast_results.csv",package="Inseasonfor")
 
 
@@ -45,7 +45,7 @@ forecast_season<-chk_season(pred_date)
     }
 
     if(nrow(local_data2)==0){
-      sdate<-  as.Date(paste0(lubridate::year(pred_date),ifelse(forecast_season=="spring","-04-05",ifelse(forecast_season=="summer","-06-16","-08-15"))))
+      sdate<-  as.Date(paste0(lubridate::year(pred_date),ifelse(forecast_season=="spring","-03-25",ifelse(forecast_season=="summer","-06-16","-08-15"))))
     }else{
           sdate <- max(local_data2$date)+1
     }
@@ -78,7 +78,7 @@ print(i)
         dplyr::left_join(River_dat |>
                            dplyr::filter(month==forecast_month,
                                          md==forecast_mday) |>
-                           dplyr::select(year=Year,cfs_mean_ema,temp_mean_ema),
+                           dplyr::select(year=Year,cfs_mean_ema,temp_mean_ema) |> dplyr::group_by(year) |> dplyr::summarize(across(c(cfs_mean_ema, temp_mean_ema),\(x)mean(x,na.rm=TRUE))) ,
         ) |>
         # dplyr::left_join(
           # Ocean_dat
@@ -97,6 +97,7 @@ print(i)
          (morph=="Bright"&(as.Date(i)>as.Date(paste0(lubridate::year(pred_date),"-10-15")))))
          ){
 
+        # browser()
       #ARIMA
       # ARIMA_for<-do_salmonForecasting_fun(fish_river_ocean_i,cov_vec=c("log_cum_cnt","cnt_by_flow"))
       #
@@ -106,7 +107,15 @@ print(i)
       # joint_likelihood_fit1<-fit_joint_likelihood(fish_river_ocean_i,forecast = forecast,forecast_log_sd = forecast_log_sd)
       #
        if(morph==""){
-        joint_likelihood_fit2<-fit_joint_likelihood2(fish_river_ocean_i ,ifelse(morph=="",forecast_season,morph))
+        # joint_likelihood_fit2<-fit_joint_likelihood2(fish_river_ocean_i ,ifelse(morph=="",forecast_season,morph))
+
+        joint_likelihood_fit2<-
+        retro_mape_joint_lik2(dat=fish_river_ocean_i,
+                              forecast_season,
+                              n_retro = 15
+
+        )$cur_pred
+
        }else{
          joint_likelihood_fit2<-data.frame()
        }
@@ -151,7 +160,7 @@ if(write_local){
         dplyr::bind_rows(
           Bon_ch_year |>
             dplyr::ungroup()|> dplyr::filter(dplyr::between(CountDate,                                            as.Date(paste0(forecast_year,
-                                                                                                                                 ifelse(forecast_season=="spring","-04-05",ifelse(forecast_season=="summer","-06-16","-08-15")))),
+                                                                                                                                 ifelse(forecast_season=="spring","-03-25",ifelse(forecast_season=="summer","-06-16","-08-15")))),
                                                             pred_date)) |>
             dplyr::mutate(`Lo 95`=total/plogis(qnorm(.975,qlogis(Ave_10yr),logit_prop_sd_10yr)),
                           `Lo 50`=total/plogis(qnorm(.75,qlogis(Ave_10yr),logit_prop_sd_10yr)),
@@ -170,7 +179,7 @@ if(write_local){
       dplyr::bind_rows(
         Bon_ch_year |>
           dplyr::ungroup()|> dplyr::filter(dplyr::between(CountDate,                                            as.Date(paste0(forecast_year,
-                                                                                                                               ifelse(forecast_season=="spring","-04-05",ifelse(forecast_season=="summer","-06-16","-08-15")))),
+                                                                                                                               ifelse(forecast_season=="spring","-03-25",ifelse(forecast_season=="summer","-06-16","-08-15")))),
                                                           pred_date)) |>
           dplyr::mutate(`Lo 95`=total/plogis(qnorm(.975,qlogis(Ave_10yr),logit_prop_sd_10yr)),
                         `Lo 50`=total/plogis(qnorm(.75,qlogis(Ave_10yr),logit_prop_sd_10yr)),
@@ -233,6 +242,10 @@ do_sibregresr_fun<-function(data,cov_vec=c("log_cum_cnt","cnt_by_flow")){#,"temp
     form =formula(paste(c("y ~ x" , cov_vec),collapse=" + "))
   )
 
+  # test<-pen_dlm_forecast_cov$ fits |>
+  #   dplyr::filter(purrr::map_lgl(error, ~!is.null(.x))) |>
+  #   dplyr::mutate(error=purrr::map_chr(error,as.character))
+  # test$error[[1]]
   # sibregresr::make_table(pen_dlm_forecast_cov$forecasts,"r2d2Dlm")
 
 

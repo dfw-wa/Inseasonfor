@@ -42,8 +42,8 @@ pred_tabs_fig<-function(pred_date,model_results,season_dates){
     gt::sub_missing() |>
     # gt::tab_footnote(footnote = "I have not yet implemented a retrospective assessment of performance for the joint-likelihood model",
     #                  locations = gt::cells_body(columns=MAPE,rows = 3)) |>
-    gt::tab_footnote(footnote = "Prediction intervals for different model types are calculated using different methods, which complicates comparison somewhat. See Methods Description for more detail.",
-                     locations = gt::cells_column_labels(columns=`Lo 95`:`Hi 95`))|>
+    # gt::tab_footnote(footnote = "Prediction intervals for different model types are calculated using different methods, which complicates comparison somewhat. See Methods Description for more detail.",
+    #                  locations = gt::cells_column_labels(columns=`Lo 95`:`Hi 95`))|>
     gt::tab_caption(paste0("Predictions of the ",forecast_season, " season (", chk_season_print("spring",season_dates),") total adult Chinook salmon count with prediction intervals (50% and 95%) and the mean absolute percent error (MAPE) of predictions made with counts through ",pred_date  |>  format("%B %d"), " in a 15-year retrospective assesment."))
 
 
@@ -75,7 +75,7 @@ pred_tabs_fig<-function(pred_date,model_results,season_dates){
     ggplot2::geom_ribbon(ggplot2::aes(ymin=`Lo 95`,ymax=`Hi 95`),alpha=.65,fill="grey40",color=NA)+
     ggplot2::geom_ribbon(ggplot2::aes(ymin=`Lo 50`,ymax=`Hi 50`),alpha=.85,fill="grey20",color=NA)+
     ggplot2::geom_line()+
-    ggplot2::geom_point(size=2.5)+ggplot2::facet_wrap(~mod_type)+ ggplot2::scale_y_continuous(labels = scales::unit_format(suffix="k",scale = 1e-3))+ ggplot2::scale_x_date(
+    ggplot2::geom_point(size=2.5)+ggplot2::facet_wrap(~mod_type,ncol=1,strip.position = "right")+ ggplot2::scale_y_continuous(labels = scales::unit_format(suffix="k",scale = 1e-3))+ ggplot2::scale_x_date(
       # date_breaks = "5 days",
       date_labels = "%b %d"
     )+ggplot2::scale_color_manual(values = cb_palette) +ggplot2::theme_grey()+ggplot2::theme(axis.title.x = ggplot2::element_blank(),text = ggplot2::element_text(size=18),legend.position = "none")+ggplot2::ylab("Predicted total dam count")+
@@ -97,7 +97,7 @@ mod_wrapper_fun<-function(pred_date,Bon_cnts,flow_temp_dat,#ocean_cov,
                           Bon_ch_year,season_dates,season_end_date,
                           write_local,
                           morph){
-
+# browser()
 
     captured_output2 <- capture.output({ # to capture printed statements and prevent them from going in the rendered output
   model_results<-   mod_results(pred_date  = pred_date,

@@ -128,6 +128,64 @@ fit_joint_likelihood2<-function(dat,forecast_season){
 }
 
 
+#' Retrospective MAPE for joint likelihood model
+#'
+#' @param dat Full dataset (same as what fit_joint_likelihood2 takes)
+#' @param forecast_season Season string
+#' @param n_retro Number of retrospective years (default 15)
+#'
+#' @return List with MAPE and per-year prediction table
+#' @export
+retro_mape_joint_lik2 <- function(dat, forecast_season, n_retro = 15) {
+
+  forecast_year <- max(dat$year)
+  retro_years <- (forecast_year - n_retro):(forecast_year )
+
+  results <- purrr::map_dfr(retro_years, function(yr) {
+    # Subset: pretend yr is the forecast year (drop future data)
+    dat_retro <- dat |>
+      dplyr::mutate(
+        tot_adult = ifelse(year == yr, NA, tot_adult),
+        log_tot_adult = ifelse(year == yr, NA, log_tot_adult)
+      ) |>
+      dplyr::filter(year <= yr)
+
+    tryCatch({
+      pred <- fit_joint_likelihood2(dat_retro, forecast_season)
+      pred |> dplyr::mutate(
+        retro_year = yr,
+        observed = dat |>
+          dplyr::filter(year == yr) |>
+          dplyr::pull(tot_adult)
+      )
+    }, error = function(e) {
+      tibble::tibble(retro_year = yr, error = conditionMessage(e))
+    })
+  })
+
+  mape <- results |>
+    head(-1) |>
+    dplyr::filter(!is.na(observed), !is.na(predicted_abundance)) |>
+    dplyr::summarise(
+      log_rmse=sqrt(mean(log(predicted_abundance/observed)^2)),
+      RMSE = sqrt(mean((predicted_abundance - observed)^2)),
+      MAPE = mean(abs(predicted_abundance - observed) / observed) * 100
+    ) |>
+    dplyr::select(MAPE,RMSE,log_rmse)
+
+  cur_pred <- tail(results,1) |> cbind(mape) |>
+    dplyr::mutate(`Hi 50`=exp(qnorm(.75,log(predicted_abundance),log_rmse)),
+                  `Hi 95`=exp(qnorm(.975,log(predicted_abundance),log_rmse)),
+                  `Lo 50`=exp(qnorm(.25,log(predicted_abundance),log_rmse)),
+                  `Lo 95`=exp(qnorm(.025,log(predicted_abundance),log_rmse))) |> dplyr::select(-c(retro_year,observed))
+
+  list(MAPE = mape, retro_predictions = results, cur_pred=cur_pred)
+}
+
+
+
+
+
 
 #' likelihood function for joint likelihood model in RTMB
 #'

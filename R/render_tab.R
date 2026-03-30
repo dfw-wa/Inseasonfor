@@ -1,7 +1,7 @@
 
 
 render_tab<-function(pred_date,counts,river_env,do_plots,seas_dats,seas_end,write_local=write_local,morph){
-
+# browser()
   if(morph!=""){
     counts2 <-counts  |>
       dplyr::rename(AdultChinook=paste(morph,"Adult",sep="_"),
@@ -34,12 +34,12 @@ if(morph=="Tule"){
     summary_plot_tabs(river_env,Bon_ch,pred_date)
 
 
-    if((lubridate::month(pred_date)<4)|
-       ((lubridate::month(pred_date)==4)&
-        (lubridate::mday(pred_date)<5))){
+    if((lubridate::month(pred_date)<3)|
+       ((lubridate::month(pred_date)==3)&
+        (lubridate::mday(pred_date)<25))){
       cat("\n\n")
 
-      cat("**Model predictions for spring season wiill start on April 5th**")
+      cat("**Model predictions for spring season wiill start on March 25th**")
       cat("\n\n")
 
     }else{
