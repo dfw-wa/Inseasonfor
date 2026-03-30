@@ -5,7 +5,7 @@ on:
   workflow_dispatch: {}
   # daily runs
   # schedule:
-  #   - cron: '15 14 * * *'  # 7am Pacific
+    - cron: '15 14 * * *'  # 7am Pacific
   #   # - cron: '0 15 * * *'  # 8am Pacific
 permissions:
   contents: write
