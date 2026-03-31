@@ -4,7 +4,7 @@ name: Daily Update and Deployment
 on:
   workflow_dispatch: {}
   # daily runs
-  # schedule:
+  schedule:
     - cron: '15 14 * * *'  # 7am Pacific
   #   # - cron: '0 15 * * *'  # 8am Pacific
 permissions:
