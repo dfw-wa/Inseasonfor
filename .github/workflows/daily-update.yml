@@ -10,10 +10,16 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: daily-update-and-deploy
+  cancel-in-progress: true
 
 jobs:
   render_and_deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       # 1. Checkout repo
@@ -21,7 +27,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
 
 
       # 2. Install system dependencies
