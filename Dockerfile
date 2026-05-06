@@ -4,6 +4,7 @@ FROM rocker/r-ver:4.5.1
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     rsync \
+    zstd \
     libx11-dev \
     libcurl4-openssl-dev \
     libssl-dev \
