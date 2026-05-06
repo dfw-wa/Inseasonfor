@@ -2,7 +2,7 @@ name: Retry Daily Update on Failure or Timeout Cancel (Delayed, Max 2 Retries)
 
 on:
   workflow_run:
-    workflows: ["Daily Update and Deployment"]
+    workflows: ["Daily Update and Deployment (Docker)"]
     types: [completed]
 
 permissions:
