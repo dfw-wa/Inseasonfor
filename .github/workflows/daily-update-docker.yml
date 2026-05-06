@@ -3,10 +3,8 @@ name: Daily Update and Deployment (Docker)
 
 on:
   workflow_dispatch: {}
-  # Uncomment the schedule below (and comment out the one in daily-update.yml)
-  # once you've verified this workflow runs correctly.
-  # schedule:
-  #   - cron: '15 14 * * *'  # 7am Pacific
+  schedule:
+    - cron: '15 14 * * *'  # 7am Pacific
 
 permissions:
   contents: write
