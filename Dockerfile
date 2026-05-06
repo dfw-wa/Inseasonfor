@@ -3,6 +3,7 @@ FROM rocker/r-ver:4.5.1
 # Install system dependencies needed by the daily update workflow
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
+    rsync \
     libx11-dev \
     libcurl4-openssl-dev \
     libssl-dev \
