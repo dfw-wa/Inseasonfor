@@ -10,10 +10,6 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: daily-update-and-deploy
-  cancel-in-progress: true
-
 jobs:
   render_and_deploy:
     runs-on: ubuntu-latest
