@@ -1,0 +1,102 @@
+
+name: Daily Update and Deployment (Docker)
+
+on:
+  workflow_dispatch: {}
+  # Uncomment the schedule below (and comment out the one in daily-update.yml)
+  # once you've verified this workflow runs correctly.
+  # schedule:
+  #   - cron: '15 14 * * *'  # 7am Pacific
+
+permissions:
+  contents: write
+  packages: read
+
+jobs:
+  render_and_deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    container:
+      image: ghcr.io/dfw-wa/inseasonfor:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      # 1. Checkout repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 2. Cache R packages managed by renv
+      - name: Cache R packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/R/renv
+          key: ${{ runner.os }}-renv-${{ hashFiles('renv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-renv-
+
+      # 2.1. Set GITHUB_PAT for renv using the built-in GitHub Actions token
+      - name: Set GITHUB_PAT for renv
+        run: echo "GITHUB_PAT=${{ github.token }}" >> $GITHUB_ENV
+
+      # 3. Install renv and restore environment
+      - name: Install and restore renv
+        run: |
+          install.packages("renv")
+          renv::restore()
+        shell: Rscript {0}
+
+      # 4. Render the rmarkdown
+      - name: Render the report using custom script (with retries)
+        run: |
+          for i in 1 2 3; do
+            echo "Attempt $i: rendering report..."
+            if Rscript inst/scripts/run_render.R; then
+              echo "Render succeeded on attempt $i"
+              break
+            fi
+            echo "Render failed on attempt $i"
+            if [ $i -lt 3 ]; then
+              echo "Retrying in 2 minutes..."
+              sleep 120
+            else
+              echo "All attempts failed."
+              exit 1
+            fi
+          done
+
+      # 5. If new model results were added to .csv, move to location for git tracking
+      - name: Move CSV into inst/data-cache for Git tracking
+        run: |
+          mkdir -p inst/data-cache
+          if [ -f data-cache/forecast_results.csv ]; then
+            mv data-cache/forecast_results.csv inst/data-cache/
+          else
+            echo "Warning: data-cache/forecast_results.csv does not exist."
+          fi
+
+      # 6. Ensure correct permissions for the CSV files (allow writing)
+      - name: Set correct permissions for CSV files
+        run: chmod -R 644 inst/data-cache/*.csv
+
+      # 7. Commit updated CSVs (if changed)
+      - name: Commit and push updated CSV files
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          git config user.email "mark.sorel@dfw.wa.gov"
+          git config user.name "marksorel8"
+          git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/dfw-wa/Inseasonfor.git
+          git add inst/data-cache/*.csv || true
+          git diff --cached --quiet || git commit -m "Update CSV files"
+          git push origin main
+
+      # 8. Deploy the html from the rendered Rmarkdown to GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: site
