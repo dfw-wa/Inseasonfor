@@ -87,6 +87,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config user.email "mark.sorel@dfw.wa.gov"
           git config user.name "marksorel8"
           git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/dfw-wa/Inseasonfor.git
