@@ -16,15 +16,17 @@ jobs:
     # Retry if:
     # - failed, OR
     # - cancelled AND it looks like a timeout-based cancellation (ran close to timeout-minutes)
-    if: >-
-      github.event.workflow_run.run_attempt < 3 &&
-      (
-        github.event.workflow_run.conclusion == 'failure' ||
+    if: |
+      ${{
+        github.event.workflow_run.run_attempt < 3 &&
         (
-          github.event.workflow_run.conclusion == 'cancelled' &&
-          github.event.workflow_run.run_duration_ms >= 1680000
+          github.event.workflow_run.conclusion == 'failure' ||
+          (
+            github.event.workflow_run.conclusion == 'cancelled' &&
+            github.event.workflow_run.run_duration_ms >= 1680000
+          )
         )
-      )
+      }}
     runs-on: ubuntu-latest
     steps:
       - name: Wait 20 minutes before retry
