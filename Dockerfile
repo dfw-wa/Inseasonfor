@@ -5,6 +5,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     rsync \
     zstd \
+    cmake \
     libx11-dev \
     libcurl4-openssl-dev \
     libssl-dev \
@@ -23,3 +24,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     zlib1g-dev \
     libnode-dev \
     && rm -rf /var/lib/apt/lists/*
+
+# Install renv and pre-restore all R packages into the image's system library
+COPY renv.lock /renv.lock
+RUN Rscript -e "\
+    install.packages('renv', repos = 'https://cloud.r-project.org'); \
+    renv::restore(lockfile = '/renv.lock', library = .libPaths()[1], prompt = FALSE)"
