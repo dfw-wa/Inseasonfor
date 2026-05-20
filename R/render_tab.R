@@ -1,6 +1,6 @@
 
 
-render_tab<-function(pred_date,counts,river_env,do_plots,seas_dats,seas_end,write_local=write_local,morph){
+render_tab<-function(pred_date,counts,river_env,do_plots,seas_dats,seas_end,write_local=write_local,morph,ref_years=NULL){
 # browser()
   if(morph!=""){
     counts2 <-counts  |>
@@ -31,7 +31,7 @@ if(morph=="Tule"){
   cat("\n\n")
 
 
-    summary_plot_tabs(river_env,Bon_ch,pred_date)
+    summary_plot_tabs(river_env,Bon_ch,pred_date,ref_years=ref_years)
 
 
     if((lubridate::month(pred_date)<3)|

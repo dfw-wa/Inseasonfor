@@ -186,7 +186,8 @@ Fall_split_cnts <- retry_get_data(
                  seas_dats=season_dates,
                  seas_end=seas_end,
                  write_local=params$use_dev_version,
-                 morph="")
+                 morph="",
+                 ref_years=ifelse(season_i=="summer",c(2015),NULL))
       
       
     }
