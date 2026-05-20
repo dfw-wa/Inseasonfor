@@ -103,7 +103,7 @@ bon_dat_fun <- function(pred_date = NULL,
       gh_log("notice", "Successfully read ", nrow(dat), " rows from FPC")
 
       dat |>
-        dplyr::select(CountDate, AdultChinook, JackChinook) |>
+        dplyr::select(CountDate, AdultChinook, JackChinook,Sockeye,UnClpSteelhead,ClpSteelhead,AllSteelhead) |>
         dplyr::mutate(
           year = lubridate::year(.data$CountDate),
           yday = lubridate::yday(.data$CountDate),
