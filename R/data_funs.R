@@ -492,6 +492,36 @@ cnts_for_mod_fun<-function(forecastdate,Bon_cnts){
 }
 
 
+#' cnts_for_mod_fun
+#'
+#' @param forecastdate
+#' @param Bon_cnts
+#'
+#' @return
+#' @export
+#'
+#' @examples
+cnts_for_mod_fun_sk<-function(forecastdate,Bon_cnts){
+
+  forecast_year<-lubridate::year(forecastdate)
+  forecast_month<-lubridate::month(forecastdate)
+  forecast_mday<-lubridate::mday(forecastdate)
+  #
+  Bon_cnts |>
+    dplyr::arrange(.data$year,.data$month,.data$mday) |>
+    dplyr::group_by(.data$year) |>
+    dplyr::mutate(
+      cum_cnt=cumsum(.data$Sockeye),
+      tot_adult=tail(.data$cum_cnt,1)
+    ) |>
+    dplyr::ungroup() |>
+    dplyr::filter(month==forecast_month,mday==forecast_mday) |>
+    dplyr::select(year,cum_cnt,tot_adult) |>
+    dplyr::mutate(tot_adult=ifelse(year==forecast_year,NA,tot_adult),
+                  log_cum_cnt=log(cum_cnt),log_tot_adult=log(tot_adult))
+}
+
+
 retry_get_data <- function(expr, max_tries = 1, name = "data", wait_sec = 30) {
   num_tries <- 0
   result <- NULL

@@ -196,6 +196,16 @@ Fall_split_cnts <- retry_get_data(
 }
 
 cat("# {-}","\n\n")
+
+
+
+
+     render_tab_sk(pred_date=forecastdate_i,
+                   river_env = flow_temp_dat,
+                 counts=Bon_cnts,
+                 write_local=TRUE)
+
+
 ```
 
 

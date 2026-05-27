@@ -101,10 +101,12 @@ current_year_cnts_plot<-function(env_dat, Bon_ch_year, cur_yr,
 
 percent_complete<-function(Bon_ch, f_yr, forecastdate,
                            start_month = 3, end_month = NULL){
+
+
   p<-
     Bon_ch |> dplyr::filter(dplyr::between(year,f_yr-15,f_yr-1)) |> dplyr::mutate(date=(as.Date(paste(f_yr,month,mday,sep="-")))) |>
     dplyr::filter(if (is.null(end_month)) month >= start_month else dplyr::between(month, start_month, end_month)) |>
-    ggplot2::ggplot(ggplot2::aes(x=date,y=prop))+ggplot2::geom_vline(ggplot2::aes(xintercept = forecastdate),col="firebrick",lty=2,lwd=1)+ggplot2::geom_boxplot(ggplot2::aes(group = date))+ ggplot2::scale_x_date(
+    ggplot2::ggplot(ggplot2::aes(x=date,y=prop))+ggplot2::geom_vline(ggplot2::aes(xintercept = as.Date(forecastdate)),col="firebrick",lty=2,lwd=1)+ggplot2::geom_boxplot(ggplot2::aes(group = date))+ ggplot2::scale_x_date(
       date_breaks = "1 month",
       date_labels = "%b"
     )+ggplot2::ylab("Percent passage complete")+ ggplot2::scale_y_continuous(labels = scales::unit_format(suffix="%",scale = 100))+ggplot2::theme_grey()+ggplot2::theme(axis.title.x = ggplot2::element_blank(),text = ggplot2::element_text(size=18))

@@ -1,7 +1,7 @@
 
 
 
-pred_tabs_fig<-function(pred_date,model_results,season_dates){
+pred_tabs_fig_sk<-function(pred_date,model_results){
 
   # covar effects tab
 
@@ -12,7 +12,7 @@ pred_tabs_fig<-function(pred_date,model_results,season_dates){
       columns = dplyr::where(is.numeric),
       decimals = 2
     ) |> gt::tab_footnote(footnote="The response and the covariates are z-scored before fitting the DLM, but the response is not standardized for the ARIMA model",locations=gt::cells_column_labels(columns = Model)) |>  gt::tab_options(table.width = "100%") |>  gt::cols_label_with(fn=function(x) gsub("_", " ", x)) |>
-    gt::tab_caption("Fitted coefficients, covariate values, and effects (coefficient * covariate) for the DLM and ARIMA models. Covariates are the log of the jack returns in the previous years, the log of the cumulative adult counts to date, and an interaction between the cumulative counts and a moving average of river discharge.")
+    gt::tab_caption("Fitted coefficients, covariate values, and effects (coefficient * covariate) for the DLM and ARIMA models. Covariates are the log of the age 3 returns in the previous years, an even-odd year indicator, the log of the cumulative counts to date, and an interaction between the cumulative counts and a moving average of river discharge.")
 
   # flow effects tab
 
@@ -44,14 +44,10 @@ pred_tabs_fig<-function(pred_date,model_results,season_dates){
     #                  locations = gt::cells_body(columns=MAPE,rows = 3)) |>
     # gt::tab_footnote(footnote = "Prediction intervals for different model types are calculated using different methods, which complicates comparison somewhat. See Methods Description for more detail.",
     #                  locations = gt::cells_column_labels(columns=`Lo 95`:`Hi 95`))|>
-    gt::tab_caption(paste0("Predictions of the ",forecast_season, " season (", chk_season_print("spring",season_dates),") total adult Chinook salmon count with prediction intervals (50% and 95%) and the mean absolute percent error (MAPE) of predictions made with counts through ",pred_date  |>  format("%B %d"), " in a 15-year retrospective assesment."))
+    gt::tab_caption(paste0("Predictions of the sockey salmon count with prediction intervals (50% and 95%) and the mean absolute percent error (MAPE) of predictions made with counts through ",pred_date  |>  format("%B %d"), " in a 15-year retrospective assesment."))
 
 
-  if(!pred_date %in%
-     as.Date(paste0(lubridate::year(pred_date),c("-06-15","-07-31")))){
-    # Pred_tab<-Pred_tab |> gt::tab_footnote(footnote = "I have not yet implemented a retrospective assessment of performance for the joint-likelihood model",
-    #                                        locations = gt::cells_body(columns=MAPE,rows = 3))
-  }
+
 
   # prediction
 
@@ -93,23 +89,23 @@ pred_tabs_fig<-function(pred_date,model_results,season_dates){
 
 
 
-mod_wrapper_fun<-function(pred_date,Bon_cnts,flow_temp_dat,#ocean_cov,
-                          Bon_ch_year,season_dates,season_end_date,
-                          write_local,
-                          morph){
-# browser()
 
-    captured_output2 <- capture.output({ # to capture printed statements and prevent them from going in the rendered output
-  model_results<-   mod_results(pred_date  = pred_date,
-                             Count_dat = Bon_cnts,
-                             River_dat = flow_temp_dat,
-                             # Ocean_dat = ocean_cov,
-                             Bon_ch_year = Bon_ch_year,
-                             write_local=write_local,
-                             morph=morph)
-})
+mod_wrapper_fun_sk<-function(pred_date,Bon_cnts,flow_temp_dat,#ocean_cov,
+                             Bon_sk_year,
+                          write_local){
+  # browser()
 
-  mod_figs_tabs<-pred_tabs_fig(pred_date=pred_date,model_results,season_dates=season_dates)
+  captured_output2 <- capture.output({ # to capture printed statements and prevent them from going in the rendered output
+    model_results<-   mod_results_sk(pred_date  = pred_date,
+                                  Count_dat = Bon_cnts,
+                                  River_dat = flow_temp_dat,
+                                  # Ocean_dat = ocean_cov,
+                                  Bon_sk_year = Bon_sk_year,
+                                  write_local=write_local,
+                                  forecast_log_sd = 0.6)
+  })
+
+  mod_figs_tabs<-pred_tabs_fig_sk(pred_date=pred_date,model_results)
 
 
   cat("\n\n")
@@ -134,14 +130,12 @@ mod_wrapper_fun<-function(pred_date,Bon_cnts,flow_temp_dat,#ocean_cov,
   cat(paste("Daily predictions and prediction intervals (95% and 50%).  Prediction intervals for different model types are calculated using different methods, so may not be directly comparable. See Methods Description for more details."), "\n")
   cat("\n\n")
 
-  if(pred_date<season_end_date&
-     (!((morph=="Tule"&(as.Date(pred_date)>as.Date(paste0(lubridate::year(pred_date),"-09-25"))))|
-          (morph=="Bright"&(as.Date(pred_date)>as.Date(paste0(lubridate::year(pred_date),"-10-15"))))))){
-  cat("###### Covariate effects","\n\n")
-  print(mod_figs_tabs$covar_effect_tab)
-  cat("\n\n")
-  print(mod_figs_tabs$flow_effect_tab)
-  cat("\n\n")
+  if(pred_date<as.Date(paste0(lubridate::year(pred_date),"-07-16"))){
+    cat("###### Covariate effects","\n\n")
+    print(mod_figs_tabs$covar_effect_tab)
+    cat("\n\n")
+    print(mod_figs_tabs$flow_effect_tab)
+    cat("\n\n")
   }
 
   cat("\n\n")
@@ -153,9 +147,10 @@ mod_wrapper_fun<-function(pred_date,Bon_cnts,flow_temp_dat,#ocean_cov,
 
 This is a penalized dynamic linear model fit with the [`Sibregresr` package](https://dfw-wa.github.io/sibregresr/articles/Overview.html). The coefficients are the:
 
-1)  log-transformed total count of jacks at Bonneville Dam in the *previous* year,
+1)  log-transformed estimates of age-3 passage at Bonneville Dam in the *previous* year,
 2)  log-transformed cumulative adult count at Bonneville Dam in the *current* year,
-3)  and interaction between an exponential moving average of river discharge and the cumulative adult count.
+3) an even-odd year indicator that starts in 2000 to reflect the pattern attributed to pink salmon interactions.
+4)  and interaction between an exponential moving average of river discharge and the cumulative adult count.
 
 The prediction interval is based on the standard deviation (in log-space) of forecasts from a 15-year retrospective. In other words, the root mean square error of the forecast error in log space from a 15-year retrospective is used as the standard deviation in a lognormal prediction interval.
 
@@ -165,7 +160,7 @@ This is an ensemble of ARIMA models fit with the [`SalmonForecasting` package](h
 
 ####### Joint likelihood
 
-This is a version of a model that has been used for this purpose of in-season forecasting for several years. The proportion of the run that is complete on a given day is modeled with autoregressive (order 1) errors and an effect of the river discharge covariate. The pre-season forecast is generated using an age-specific sibling regression. I have not yet implemented a retrospective assessment of performance because, in this version, the pre-season forecasts and prediction uncertainty need to be provided, and I have not pulled in the past 15 years' forecasts.
+This is a version of a model that has been used for this purpose of in-season forecasting for several years. The proportion of the run that is complete on a given day is modeled with autoregressive (order 1) errors and an effect of the river discharge covariate. The pre-season forecasts are provided as inputs and assumed to have a lognormal error of 0.6.
 
 ####### 10 year average run timing
 
@@ -175,8 +170,5 @@ This method takes the 10-year average of the proportion of the run that was comp
 
   cat("\n\n")
 
-  }
-
-
-
+}
 

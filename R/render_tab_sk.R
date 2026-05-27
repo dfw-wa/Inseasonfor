@@ -23,8 +23,10 @@ render_tab_sk <- function(pred_date, counts, river_env, write_local = write_loca
                     end_month     = 7,
                     ref_years     = c(2015))
 
-  # TODO: Sockeye model predictions (equivalent of mod_wrapper_fun) not yet
-  # implemented. Add mod_wrapper_fun_sk() here once available.
+  mod_wrapper_fun_sk(pred_date,counts,river_env,#ocean_cov,
+                  Bon_sk_year,
+                  write_local=write_local)
+
 
   bon_sk_tabs(Bon_sk_year, for_year, pred_date)
 
