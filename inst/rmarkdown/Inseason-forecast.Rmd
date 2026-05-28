@@ -187,7 +187,7 @@ Fall_split_cnts <- retry_get_data(
                  seas_end=seas_end,
                  write_local=params$use_dev_version,
                  morph="",
-                 ref_years=ifelse(season_i=="summer",c(2015),NULL))
+                 ref_years = if (season_i == "summer") c(2015) else NULL)
       
       
     }
@@ -195,15 +195,30 @@ Fall_split_cnts <- retry_get_data(
   
 }
 
+## Sockeye tab
+cat("## Sockeye\n\n")
+
+sk_seas_start <- as.Date(paste0(forecast_year, "-06-15"))
+sk_seas_end   <- as.Date(paste0(forecast_year, "-07-31"))
+
+if (forecastdate > sk_seas_end) {
+  forecastdate_sk <- sk_seas_end
+} else {
+  forecastdate_sk <- forecastdate
+}
+
+if (forecastdate < sk_seas_start) {
+  cat(sprintf("**The %s sockeye season starts June 15. Below are results from %s.**",
+              forecast_year, forecast_year - 1), "\n\n")
+  forecastdate_sk <- as.Date(paste0(forecast_year - 1, "-07-31"))
+}
+
+render_tab_sk(pred_date   = forecastdate_sk,
+              counts      = Bon_cnts,
+              river_env   = flow_temp_dat,
+              write_local = params$use_dev_version)
+
 cat("# {-}","\n\n")
-
-
-
-
-     render_tab_sk(pred_date=forecastdate_i,
-                   river_env = flow_temp_dat,
-                 counts=Bon_cnts,
-                 write_local=TRUE)
 
 
 ```

@@ -95,7 +95,7 @@ pred_tabs_fig<-function(pred_date,model_results,season_dates){
 
 mod_wrapper_fun<-function(pred_date,Bon_cnts,flow_temp_dat,#ocean_cov,
                           Bon_ch_year,season_dates,season_end_date,
-                          write_local,
+                          write_local=TRUE,
                           morph){
 # browser()
 

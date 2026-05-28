@@ -23,9 +23,16 @@ render_tab_sk <- function(pred_date, counts, river_env, write_local = write_loca
                     end_month     = 7,
                     ref_years     = c(2015))
 
-  mod_wrapper_fun_sk(pred_date,counts,river_env,#ocean_cov,
-                  Bon_sk_year,
-                  write_local=write_local)
+  if ((lubridate::month(pred_date) < 6) |
+      (lubridate::month(pred_date) == 6 & lubridate::mday(pred_date) < 15)) {
+    cat("\n\n")
+    cat("**Model predictions for the sockeye season will start on June 15th**")
+    cat("\n\n")
+  } else {
+    mod_wrapper_fun_sk(pred_date, counts, river_env, #ocean_cov,
+                       Bon_sk_year,
+                       write_local = write_local)
+  }
 
 
   bon_sk_tabs(Bon_sk_year, for_year, pred_date)

@@ -15,7 +15,7 @@ mod_results<-function(pred_date,
                       River_dat = flow_temp_dat,
                       # Ocean_dat = ocean_cov,
                       Bon_ch_year = Bon_ch_year,
-                      write_local=FALSE,
+                      write_local=TRUE,
                       morph){
 
   # if (is.null(mod_result_file)) {
@@ -36,7 +36,8 @@ forecast_season<-chk_season(pred_date)
       dplyr::mutate(season=chk_season(date),
                     year=lubridate::year(date)) |>
       dplyr::filter(season==forecast_season,
-                    year==lubridate::year(pred_date))
+                    year==lubridate::year(pred_date),
+                    ecotype!="Sk")
 
 
     if(morph!=""){

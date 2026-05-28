@@ -47,13 +47,15 @@ file_path<-system.file("data-cache/forecast_results.csv",package="Inseasonfor")
     local_data<-NULL
     local_data2<-data.frame(ecotype=character(0))
 
-    sdate<-  as.Date(paste0(lubridate::year(pred_date),ifelse("-06-15")))
+    sdate<-  as.Date(paste0(lubridate::year(pred_date),"-06-15"))
 
   }
 
 
 
 
+
+  forecast_year <- lubridate::year(pred_date)
 
   if(sdate<=pred_date){
     new_dat<-data.frame()
@@ -144,7 +146,7 @@ if(write_local){
       # add 10 year timing to model resutls
         dplyr::bind_rows(
           Bon_sk_year |>
-            dplyr::ungroup()|> dplyr::filter(dplyr::between(CountDate,                                            as.Date(paste0(forecast_year,"-07-15")),
+            dplyr::ungroup()|> dplyr::filter(dplyr::between(CountDate,                                            as.Date(paste0(forecast_year,"-06-15")),
                                                             pred_date)) |>
             dplyr::mutate(`Lo 95`=total/plogis(qnorm(.975,qlogis(Ave_10yr),logit_prop_sd_10yr)),
                           `Lo 50`=total/plogis(qnorm(.75,qlogis(Ave_10yr),logit_prop_sd_10yr)),
