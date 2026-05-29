@@ -10,43 +10,33 @@
 #' @export
 #'
 #' @examples
-mod_results<-function(pred_date,
+mod_results_sk<-function(pred_date,
                       Count_dat = Bon_cnts,
                       River_dat = flow_temp_dat,
                       # Ocean_dat = ocean_cov,
-                      Bon_ch_year = Bon_ch_year,
-                      write_local=TRUE,
-                      morph){
-
+                      Bon_sk_year = Bon_sk_year,
+                      write_local=FALSE,
+                      forecast_log_sd=forecast_log_sd){
   # if (is.null(mod_result_file)) {
   #   mod_result_file <- get_default_model_result_path()
   # }
 # browser()
 file_path <- here::here("inst", "data-cache", "forecast_results.csv")
 
-
-
-forecast_season<-chk_season(pred_date)
-
   if (file.exists(file_path)) {
     local_data <-
       readr::read_csv(file_path)
 
     local_data2<- local_data |>
-      dplyr::mutate(season=chk_season(date),
-                    year=lubridate::year(date)) |>
-      dplyr::filter(season==forecast_season,
-                    year==lubridate::year(pred_date),
-                    ecotype!="Sk")
+      dplyr::mutate(year=lubridate::year(date)) |>
+      dplyr::filter(year==lubridate::year(pred_date),
+                    ecotype=="Sk")
 
 
-    if(morph!=""){
-      local_data2<-local_data2 |>
-        dplyr::filter(ecotype==morph&!is.na(ecotype))
-    }
 
     if(nrow(local_data2)==0){
-      sdate<-  as.Date(paste0(lubridate::year(pred_date),ifelse(forecast_season=="spring","-03-25",ifelse(forecast_season=="summer","-06-16","-08-15"))))
+      sdate<-  as.Date(paste0(lubridate::year(pred_date),("-06-15")))
+
     }else{
           sdate <- max(local_data2$date)+1
     }
@@ -57,13 +47,15 @@ forecast_season<-chk_season(pred_date)
     local_data<-NULL
     local_data2<-data.frame(ecotype=character(0))
 
-    sdate<-  as.Date(paste0(lubridate::year(pred_date),ifelse(forecast_season=="spring","-04-05",ifelse(forecast_season=="summer","-06-16","-08-15"))))
+    sdate<-  as.Date(paste0(lubridate::year(pred_date),"-06-15"))
 
   }
 
 
 
 
+
+  forecast_year <- lubridate::year(pred_date)
 
   if(sdate<=pred_date){
     new_dat<-data.frame()
@@ -73,65 +65,59 @@ print(i)
       forecast_year<-lubridate::year(as.Date(i))
       forecast_month<-lubridate::month(as.Date(i))
       forecast_mday<-lubridate::mday(as.Date(i))
-      forecast_season<-chk_season(as.Date(i))
 
-      fish_river_ocean_i<-cnts_for_mod_fun(as.Date(i),Bon_cnts=Count_dat) |>
+      fish_river_ocean_i<-cnts_for_mod_fun_sk(as.Date(i),Bon_cnts=Count_dat) |>
         dplyr::left_join(River_dat |>
                            dplyr::filter(month==forecast_month,
                                          md==forecast_mday) |>
                            dplyr::select(year=Year,cfs_mean_ema,temp_mean_ema) |> dplyr::group_by(year) |> dplyr::summarize(across(c(cfs_mean_ema, temp_mean_ema),\(x)mean(x,na.rm=TRUE))) ,
         ) |>
+        dplyr::left_join(
+          sockeye_age3 #add age 3 predictor
+        ) |>
         # dplyr::left_join(
           # Ocean_dat
         # ) |>
         dplyr::mutate(
+          pink_ind=dplyr::case_when(
+            year<2000 ~ 0,
+            year %% 2 == 0 ~1,
+            TRUE~ -1),
           cnt_by_flow= cfs_mean_ema*log_cum_cnt,
           cnt_by_temp= temp_mean_ema *log_cum_cnt,
-        )|>   dplyr::filter(year<=forecast_year)
+        ) |>   dplyr::filter(year<=forecast_year)
 
 
-      #don't try modeling the counts on the last day of season when we know what they are! or late in the fall season when runs are pretty much comples
-      if(!
-        (((as.Date(i) %in%
-         as.Date(paste0(lubridate::year(pred_date),c("-06-15","-07-31")))))|
-         (morph=="Tule"&(as.Date(i)>as.Date(paste0(lubridate::year(pred_date),"-09-25"))))|
-         (morph=="Bright"&(as.Date(i)>as.Date(paste0(lubridate::year(pred_date),"-10-15")))))
-         ){
+      #don't try modeling the counts on the last day of season when we know what they are! or late in the fall season when runs are pretty much complete
+      if( as.Date(i) < as.Date(paste0(lubridate::year(pred_date),"-07-15"))){
 
         # browser()
       #ARIMA
-      # ARIMA_for<-do_salmonForecasting_fun(fish_river_ocean_i,cov_vec=c("log_cum_cnt","cnt_by_flow"))
+      ARIMA_for<-do_salmonForecasting_fun_sk(fish_river_ocean_i,cov_vec=c("log_cum_cnt","cnt_by_flow","pink_ind"))
       #
       #   #DLM
-        DLM_for<-do_sibregresr_fun(fish_river_ocean_i,cov_vec=c("log_cum_cnt","cnt_by_flow"))
+        DLM_for<-do_sibregresr_fun_sk(fish_river_ocean_i,cov_vec=c("lag_log_Age3_tot" ,"log_cum_cnt","cnt_by_flow","pink_ind"))
       #Joint_like
-      # joint_likelihood_fit1<-fit_joint_likelihood(fish_river_ocean_i,forecast = forecast,forecast_log_sd = forecast_log_sd)
+      joint_likelihood_fit1<-retro_mape_joint_lik_sk(dat=fish_river_ocean_i,forecast_log_sd = forecast_log_sd,
+                              n_retro = 15)$cur_pred
       #
-       if(morph==""){
+
         # joint_likelihood_fit2<-fit_joint_likelihood2(fish_river_ocean_i ,ifelse(morph=="",forecast_season,morph))
 
-        joint_likelihood_fit2<-
-        retro_mape_joint_lik2(dat=fish_river_ocean_i,
-                              forecast_season,
-                              n_retro = 15
 
-        )$cur_pred
 
-       }else{
-         joint_likelihood_fit2<-data.frame()
-       }
 
       #combined
       comb_for<-   dplyr::bind_rows(
         DLM_for,
-      # ARIMA_for,
+      ARIMA_for,
       # joint_likelihood_fit1,
-      joint_likelihood_fit2
+      joint_likelihood_fit1
       ) |>
         dplyr::mutate(
           date=as.Date(i),
           dplyr::across(dplyr::where(is.numeric),\(x)round(x,3)),
-          ecotype=ifelse(forecast_season!="fall",forecast_season,morph)
+          ecotype="Sk"
         )
 
       new_dat<-
@@ -157,9 +143,8 @@ if(write_local){
       dplyr::bind_rows(local_data2,new_dat) |>
       # add 10 year timing to model resutls
         dplyr::bind_rows(
-          Bon_ch_year |>
-            dplyr::ungroup()|> dplyr::filter(dplyr::between(CountDate,                                            as.Date(paste0(forecast_year,
-                                                                                                                                 ifelse(forecast_season=="spring","-03-25",ifelse(forecast_season=="summer","-06-16","-08-15")))),
+          Bon_sk_year |>
+            dplyr::ungroup()|> dplyr::filter(dplyr::between(CountDate,                                            as.Date(paste0(forecast_year,"-06-15")),
                                                             pred_date)) |>
             dplyr::mutate(`Lo 95`=total/plogis(qnorm(.975,qlogis(Ave_10yr),logit_prop_sd_10yr)),
                           `Lo 50`=total/plogis(qnorm(.75,qlogis(Ave_10yr),logit_prop_sd_10yr)),
@@ -173,12 +158,12 @@ if(write_local){
     )
 }else{
   return(
+
     local_data2|>
       # add 10 year timing to model resutls
       dplyr::bind_rows(
-        Bon_ch_year |>
-          dplyr::ungroup()|> dplyr::filter(dplyr::between(CountDate,                                            as.Date(paste0(forecast_year,
-                                                                                                                               ifelse(forecast_season=="spring","-03-25",ifelse(forecast_season=="summer","-06-16","-08-15")))),
+        Bon_sk_year |>
+          dplyr::ungroup()|> dplyr::filter(dplyr::between(CountDate,                                            as.Date(paste0(forecast_year,"-06-15")),
                                                           pred_date)) |>
           dplyr::mutate(`Lo 95`=total/plogis(qnorm(.975,qlogis(Ave_10yr),logit_prop_sd_10yr)),
                         `Lo 50`=total/plogis(qnorm(.75,qlogis(Ave_10yr),logit_prop_sd_10yr)),
@@ -217,10 +202,10 @@ if(write_local){
 #' @export
 #'
 #' @examples
-do_sibregresr_fun<-function(data,cov_vec=c("log_cum_cnt","cnt_by_flow")){#,"temp_mean_ema","lag2_Spr_NPGO","lag2_Spr_PDO"
+do_sibregresr_fun_sk<-function(data,cov_vec=c("lag_log_Age3_tot" ,"log_cum_cnt","cnt_by_flow","pink_ind")){#,"temp_mean_ema","lag2_Spr_NPGO","lag2_Spr_PDO"
 
   ## data for sibregresr package
-  sib_reg_dat<-data |> dplyr::mutate(Stock=paste("Bon","Chk",sep="_")) |> dplyr::select(Stock,ReturnYear=year,Age3=tot_jack ,Age4=tot_adult) |>
+  sib_reg_dat<-data |> dplyr::mutate(Stock=paste("Bon","Chk",sep="_")) |> dplyr::select(Stock,ReturnYear=year ,Age4=tot_adult) |>
     dplyr::filter(ReturnYear<max(ReturnYear))
 
 
@@ -238,7 +223,8 @@ do_sibregresr_fun<-function(data,cov_vec=c("log_cum_cnt","cnt_by_flow")){#,"temp
     perf_yrs = 15,
     wt_yrs = 1,
     covariates = sib_reg_cov ,
-    form =formula(paste(c("y ~ x" , cov_vec),collapse=" + "))
+    include_youngest = TRUE,
+    form =formula(paste(c("y ~ 1" , cov_vec),collapse=" + "))
   )
 
   # test<-pen_dlm_forecast_cov$ fits |>
@@ -269,12 +255,12 @@ do_sibregresr_fun<-function(data,cov_vec=c("log_cum_cnt","cnt_by_flow")){#,"temp
 
 
 
-  coefs<-c(unlist(tail(info$MLE[[1]]$result$obj$report()$coefs,1))) |> `names<-`(c("intercept","log_lag_jack",cov_vec[]))
+  coefs<-c(unlist(tail(info$MLE[[1]]$result$obj$report()$coefs,1))) |> `names<-`(c("intercept",cov_vec[]))
 
 
-  covs<-c(1,unlist(tail(info$xy_dat[[1]],1)[,c("x",cov_vec)]))|> `names<-`(c("intercept","log_lag_jack",cov_vec[]))
+  covs<-c(1,unlist(tail(info$xy_dat[[1]],1)[,c(cov_vec)]))|> `names<-`(c("intercept",cov_vec[]))
 
-  mean_effects<-coefs*covs |> `names<-`(c("intercept","log_lag_jack",cov_vec[]))
+  mean_effects<-coefs*covs |> `names<-`(c("intercept",cov_vec[]))
 
 
 
@@ -304,10 +290,10 @@ do_sibregresr_fun<-function(data,cov_vec=c("log_cum_cnt","cnt_by_flow")){#,"temp
 #' @export
 #'
 #' @examples
-do_salmonForecasting_fun<-function(data,cov_vec=c("log_cum_cnt","cnt_by_flow")){
+do_salmonForecasting_fun_sk<-function(data,cov_vec=c("log_cum_cnt","cnt_by_flow","pink_ind")){
 
 
-  salmonForecasting_dat<-data |> dplyr::mutate(species="Bon_Spr",period=1) |> dplyr::select(species,period,year,abundance=tot_adult,log_lag_jack,log_cum_cnt,cfs_mean_ema:dplyr::last_col()) |>
+  salmonForecasting_dat<-data |> dplyr::mutate(species="Bon_Spr",period=1) |> dplyr::select(species,period,year,abundance=tot_adult,log_lag_jack=lag_log_Age3_tot ,log_cum_cnt,cfs_mean_ema:dplyr::last_col()) |>
     tidyr::fill(c("log_lag_jack",cov_vec[])) |>
     dplyr::mutate(
       dplyr::across(c("log_lag_jack",cov_vec[]),\(x)c(scale(x)))

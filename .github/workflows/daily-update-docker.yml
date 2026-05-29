@@ -46,21 +46,7 @@ jobs:
             fi
           done
 
-      # 3. If new model results were added to .csv, move to location for git tracking
-      - name: Move CSV into inst/data-cache for Git tracking
-        run: |
-          mkdir -p inst/data-cache
-          if [ -f data-cache/forecast_results.csv ]; then
-            mv data-cache/forecast_results.csv inst/data-cache/
-          else
-            echo "Warning: data-cache/forecast_results.csv does not exist."
-          fi
-
-      # 4. Ensure correct permissions for the CSV files (allow writing)
-      - name: Set correct permissions for CSV files
-        run: chmod -R 644 inst/data-cache/*.csv
-
-      # 5. Commit updated CSVs (if changed)
+      # 3. Commit updated CSVs (if changed)
       - name: Commit and push updated CSV files
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}

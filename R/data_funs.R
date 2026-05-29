@@ -103,7 +103,7 @@ bon_dat_fun <- function(pred_date = NULL,
       gh_log("notice", "Successfully read ", nrow(dat), " rows from FPC")
 
       dat |>
-        dplyr::select(CountDate, AdultChinook, JackChinook) |>
+        dplyr::select(CountDate, AdultChinook, JackChinook,Sockeye,UnClpSteelhead,ClpSteelhead,AllSteelhead) |>
         dplyr::mutate(
           year = lubridate::year(.data$CountDate),
           yday = lubridate::yday(.data$CountDate),
@@ -489,6 +489,36 @@ cnts_for_mod_fun<-function(forecastdate,Bon_cnts){
     dplyr::select(year,cum_cnt,tot_adult,tot_jack,lag_jack) |>
     dplyr::mutate(tot_adult=ifelse(year==forecast_year,NA,tot_adult),
   log_cum_cnt=log(cum_cnt),log_tot_adult=log(tot_adult),log_lag_jack=log(lag_jack))
+}
+
+
+#' cnts_for_mod_fun
+#'
+#' @param forecastdate
+#' @param Bon_cnts
+#'
+#' @return
+#' @export
+#'
+#' @examples
+cnts_for_mod_fun_sk<-function(forecastdate,Bon_cnts){
+
+  forecast_year<-lubridate::year(forecastdate)
+  forecast_month<-lubridate::month(forecastdate)
+  forecast_mday<-lubridate::mday(forecastdate)
+  #
+  Bon_cnts |>
+    dplyr::arrange(.data$year,.data$month,.data$mday) |>
+    dplyr::group_by(.data$year) |>
+    dplyr::mutate(
+      cum_cnt=cumsum(.data$Sockeye),
+      tot_adult=tail(.data$cum_cnt,1)
+    ) |>
+    dplyr::ungroup() |>
+    dplyr::filter(month==forecast_month,mday==forecast_mday) |>
+    dplyr::select(year,cum_cnt,tot_adult) |>
+    dplyr::mutate(tot_adult=ifelse(year==forecast_year,NA,tot_adult),
+                  log_cum_cnt=log(cum_cnt),log_tot_adult=log(tot_adult))
 }
 
 
