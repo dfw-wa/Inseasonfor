@@ -22,7 +22,7 @@ mod_results<-function(pred_date,
   #   mod_result_file <- get_default_model_result_path()
   # }
 # browser()
-file_path<-system.file("data-cache/forecast_results.csv",package="Inseasonfor")
+file_path <- here::here("inst", "data-cache", "forecast_results.csv")
 
 
 
@@ -148,9 +148,7 @@ print(i)
 if(write_local){
   readr::write_csv(dat, here::here("inst","data-cache","forecast_results.csv"))
 }else{
-      write_file_path <- file.path(here::here("data-cache"), "forecast_results.csv")
-    dir.create(dirname(write_file_path), showWarnings = FALSE, recursive = TRUE)
-    readr::write_csv(dat, write_file_path)
+  readr::write_csv(dat, here::here("inst","data-cache","forecast_results.csv"))
 }
 
 
