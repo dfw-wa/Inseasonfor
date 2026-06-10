@@ -13,6 +13,8 @@ jobs:
   render_and_deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     container:
       image: ghcr.io/dfw-wa/inseasonfor:latest
       credentials:
@@ -22,7 +24,7 @@ jobs:
     steps:
       # 1. Checkout repo
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -75,7 +77,7 @@ jobs:
 
       # 6. Deploy the html from the rendered Rmarkdown to GitHub Pages
       - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+        uses: JamesIves/github-pages-deploy-action@v4.8.0
         with:
           branch: gh-pages
           folder: site
