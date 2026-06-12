@@ -207,7 +207,13 @@ if (forecastdate > sk_seas_end) {
   forecastdate_sk <- forecastdate
 }
 
-if (forecastdate < sk_seas_start) {
+sk_current_yr_count <- Bon_cnts |>
+  dplyr::filter(lubridate::year(CountDate) == forecast_year,
+                CountDate <= forecastdate) |>
+  dplyr::summarise(total = sum(Sockeye, na.rm = TRUE)) |>
+  dplyr::pull(total)
+
+if (forecastdate < sk_seas_start & sk_current_yr_count < 100) {
   cat(sprintf("**The %s sockeye season starts June 15. Below are results from %s.**",
               forecast_year, forecast_year - 1), "\n\n")
   forecastdate_sk <- as.Date(paste0(forecast_year - 1, "-07-31"))
