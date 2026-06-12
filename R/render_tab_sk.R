@@ -34,7 +34,7 @@ render_tab_sk <- function(pred_date, counts, river_env, write_local = write_loca
   }
 
   before_june15 <- (lubridate::month(pred_date) < 6) |
-    (lubridate::month(pred_date) == 6 & lubridate::mday(pred_date) < 14)
+    (lubridate::month(pred_date) == 6 & lubridate::mday(pred_date) < 11)
 
   if (!before_june15 & current_yr_count > 1000) {
     mod_wrapper_fun_sk(pred_date, counts, river_env, #ocean_cov,
@@ -43,9 +43,9 @@ render_tab_sk <- function(pred_date, counts, river_env, write_local = write_loca
   } else {
     cat("\n\n")
     if (before_june15 & current_yr_count <= 1000) {
-      cat("**Model predictions for the sockeye season will start on June 15th once cumulative counts exceed 1,000 fish.**")
+      cat("**Model predictions for the sockeye season will start on June 12th once cumulative counts exceed 1,000 fish.**")
     } else if (before_june15) {
-      cat("**Model predictions for the sockeye season will start on June 15th.**")
+      cat("**Model predictions for the sockeye season will start on June 12th.**")
     } else {
       cat("**Model predictions will begin once cumulative sockeye counts exceed 1,000 fish.**")
     }

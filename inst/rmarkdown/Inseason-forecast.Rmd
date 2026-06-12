@@ -214,7 +214,7 @@ sk_current_yr_count <- Bon_cnts |>
   dplyr::pull(total)
 
 if (forecastdate < sk_seas_start & sk_current_yr_count < 100) {
-  cat(sprintf("**The %s sockeye season starts June 15. Below are results from %s.**",
+  cat(sprintf("**The %s sockeye updates will start when counts exceed 100 fish. Below are results from %s.**",
               forecast_year, forecast_year - 1), "\n\n")
   forecastdate_sk <- as.Date(paste0(forecast_year - 1, "-07-31"))
 }

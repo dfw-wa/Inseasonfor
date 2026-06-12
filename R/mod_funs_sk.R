@@ -35,7 +35,7 @@ file_path <- here::here("inst", "data-cache", "forecast_results.csv")
 
 
     if(nrow(local_data2)==0){
-      sdate<-  as.Date(paste0(lubridate::year(pred_date),("-06-15")))
+      sdate<-  as.Date(paste0(lubridate::year(pred_date),("-06-11")))
 
     }else{
           sdate <- max(local_data2$date)+1
@@ -47,7 +47,7 @@ file_path <- here::here("inst", "data-cache", "forecast_results.csv")
     local_data<-NULL
     local_data2<-data.frame(ecotype=character(0))
 
-    sdate<-  as.Date(paste0(lubridate::year(pred_date),"-06-15"))
+    sdate<-  as.Date(paste0(lubridate::year(pred_date),"-06-11"))
 
   }
 
@@ -144,7 +144,7 @@ if(write_local){
       # add 10 year timing to model resutls
         dplyr::bind_rows(
           Bon_sk_year |>
-            dplyr::ungroup()|> dplyr::filter(dplyr::between(CountDate,                                            as.Date(paste0(forecast_year,"-06-15")),
+            dplyr::ungroup()|> dplyr::filter(dplyr::between(CountDate,                                            as.Date(paste0(forecast_year,"-06-11")),
                                                             pred_date)) |>
             dplyr::mutate(`Lo 95`=total/plogis(qnorm(.975,qlogis(Ave_10yr),logit_prop_sd_10yr)),
                           `Lo 50`=total/plogis(qnorm(.75,qlogis(Ave_10yr),logit_prop_sd_10yr)),
@@ -163,7 +163,7 @@ if(write_local){
       # add 10 year timing to model resutls
       dplyr::bind_rows(
         Bon_sk_year |>
-          dplyr::ungroup()|> dplyr::filter(dplyr::between(CountDate,                                            as.Date(paste0(forecast_year,"-06-15")),
+          dplyr::ungroup()|> dplyr::filter(dplyr::between(CountDate,                                            as.Date(paste0(forecast_year,"-06-11")),
                                                           pred_date)) |>
           dplyr::mutate(`Lo 95`=total/plogis(qnorm(.975,qlogis(Ave_10yr),logit_prop_sd_10yr)),
                         `Lo 50`=total/plogis(qnorm(.75,qlogis(Ave_10yr),logit_prop_sd_10yr)),
