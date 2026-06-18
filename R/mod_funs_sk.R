@@ -154,6 +154,20 @@ if(write_local){
                           MAPE_10yr=MAPE_10yr*100) |>
             dplyr::select(mod_type,predicted_abundance=pred_Ave_10yr,`Lo 95`:`Hi 95`,MAPE=MAPE_10yr,date=CountDate)
 
+           ) |>
+      # add 5 year timing to model results
+        dplyr::bind_rows(
+          Bon_sk_year |>
+            dplyr::ungroup()|> dplyr::filter(dplyr::between(CountDate,                                            as.Date(paste0(forecast_year,"-06-11")),
+                                                            pred_date)) |>
+            dplyr::mutate(`Lo 95`=total/plogis(qnorm(.975,qlogis(Ave_5yr),logit_prop_sd_5yr)),
+                          `Lo 50`=total/plogis(qnorm(.75,qlogis(Ave_5yr),logit_prop_sd_5yr)),
+                          `Hi 50`=total/plogis(qnorm(.25,qlogis(Ave_5yr),logit_prop_sd_5yr)),
+                          `Hi 95`=total/plogis(qnorm(.025,qlogis(Ave_5yr),logit_prop_sd_5yr)),
+                          mod_type="5-year\nave. timing",
+                          MAPE_5yr=MAPE_5yr*100) |>
+            dplyr::select(mod_type,predicted_abundance=pred_Ave_5yr,`Lo 95`:`Hi 95`,MAPE=MAPE_5yr,date=CountDate)
+
            )
     )
 }else{
@@ -172,6 +186,20 @@ if(write_local){
                         mod_type="10-year\nave. timing",
                         MAPE_10yr=MAPE_10yr*100) |>
           dplyr::select(mod_type,predicted_abundance=pred_Ave_10yr,`Lo 95`:`Hi 95`,MAPE=MAPE_10yr,date=CountDate)
+
+      ) |>
+      # add 5 year timing to model results
+      dplyr::bind_rows(
+        Bon_sk_year |>
+          dplyr::ungroup()|> dplyr::filter(dplyr::between(CountDate,                                            as.Date(paste0(forecast_year,"-06-11")),
+                                                          pred_date)) |>
+          dplyr::mutate(`Lo 95`=total/plogis(qnorm(.975,qlogis(Ave_5yr),logit_prop_sd_5yr)),
+                        `Lo 50`=total/plogis(qnorm(.75,qlogis(Ave_5yr),logit_prop_sd_5yr)),
+                        `Hi 50`=total/plogis(qnorm(.25,qlogis(Ave_5yr),logit_prop_sd_5yr)),
+                        `Hi 95`=total/plogis(qnorm(.025,qlogis(Ave_5yr),logit_prop_sd_5yr)),
+                        mod_type="5-year\nave. timing",
+                        MAPE_5yr=MAPE_5yr*100) |>
+          dplyr::select(mod_type,predicted_abundance=pred_Ave_5yr,`Lo 95`:`Hi 95`,MAPE=MAPE_5yr,date=CountDate)
 
       )
 

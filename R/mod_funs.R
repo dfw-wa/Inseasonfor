@@ -98,9 +98,8 @@ print(i)
          (morph=="Bright"&(as.Date(i)>as.Date(paste0(lubridate::year(pred_date),"-10-15")))))
          ){
 
-        # browser()
       #ARIMA
-      # ARIMA_for<-do_salmonForecasting_fun(fish_river_ocean_i,cov_vec=c("log_cum_cnt","cnt_by_flow"))
+      ARIMA_for<-do_salmonForecasting_fun(fish_river_ocean_i,cov_vec=c("log_cum_cnt","cnt_by_flow"))
       #
       #   #DLM
         DLM_for<-do_sibregresr_fun(fish_river_ocean_i,cov_vec=c("log_cum_cnt","cnt_by_flow"))
@@ -124,7 +123,7 @@ print(i)
       #combined
       comb_for<-   dplyr::bind_rows(
         DLM_for,
-      # ARIMA_for,
+      ARIMA_for,
       # joint_likelihood_fit1,
       joint_likelihood_fit2
       ) |>
@@ -169,6 +168,21 @@ if(write_local){
                           MAPE_10yr=MAPE_10yr*100) |>
             dplyr::select(mod_type,predicted_abundance=pred_Ave_10yr,`Lo 95`:`Hi 95`,MAPE=MAPE_10yr,date=CountDate)
 
+           ) |>
+      # add 5 year timing to model results
+        dplyr::bind_rows(
+          Bon_ch_year |>
+            dplyr::ungroup()|> dplyr::filter(dplyr::between(CountDate,                                            as.Date(paste0(forecast_year,
+                                                                                                                                   ifelse(forecast_season=="spring","-03-25",ifelse(forecast_season=="summer","-06-16","-08-15")))),
+                                                            pred_date)) |>
+            dplyr::mutate(`Lo 95`=total/plogis(qnorm(.975,qlogis(Ave_5yr),logit_prop_sd_5yr)),
+                          `Lo 50`=total/plogis(qnorm(.75,qlogis(Ave_5yr),logit_prop_sd_5yr)),
+                          `Hi 50`=total/plogis(qnorm(.25,qlogis(Ave_5yr),logit_prop_sd_5yr)),
+                          `Hi 95`=total/plogis(qnorm(.025,qlogis(Ave_5yr),logit_prop_sd_5yr)),
+                          mod_type="5-year\nave. timing",
+                          MAPE_5yr=MAPE_5yr*100) |>
+            dplyr::select(mod_type,predicted_abundance=pred_Ave_5yr,`Lo 95`:`Hi 95`,MAPE=MAPE_5yr,date=CountDate)
+
            )
     )
 }else{
@@ -187,6 +201,21 @@ if(write_local){
                         mod_type="10-year\nave. timing",
                         MAPE_10yr=MAPE_10yr*100) |>
           dplyr::select(mod_type,predicted_abundance=pred_Ave_10yr,`Lo 95`:`Hi 95`,MAPE=MAPE_10yr,date=CountDate)
+
+      ) |>
+      # add 5 year timing to model results
+      dplyr::bind_rows(
+        Bon_ch_year |>
+          dplyr::ungroup()|> dplyr::filter(dplyr::between(CountDate,                                            as.Date(paste0(forecast_year,
+                                                                                                                               ifelse(forecast_season=="spring","-03-25",ifelse(forecast_season=="summer","-06-16","-08-15")))),
+                                                          pred_date)) |>
+          dplyr::mutate(`Lo 95`=total/plogis(qnorm(.975,qlogis(Ave_5yr),logit_prop_sd_5yr)),
+                        `Lo 50`=total/plogis(qnorm(.75,qlogis(Ave_5yr),logit_prop_sd_5yr)),
+                        `Hi 50`=total/plogis(qnorm(.25,qlogis(Ave_5yr),logit_prop_sd_5yr)),
+                        `Hi 95`=total/plogis(qnorm(.025,qlogis(Ave_5yr),logit_prop_sd_5yr)),
+                        mod_type="5-year\nave. timing",
+                        MAPE_5yr=MAPE_5yr*100) |>
+          dplyr::select(mod_type,predicted_abundance=pred_Ave_5yr,`Lo 95`:`Hi 95`,MAPE=MAPE_5yr,date=CountDate)
 
       )
 
@@ -339,11 +368,20 @@ do_salmonForecasting_fun<-function(data,cov_vec=c("log_cum_cnt","cnt_by_flow")){
     lapply(\(x)x[[1]]) |>
     dplyr::bind_rows()
 
-  model_weights<-ARIMA_forecast$ens$final_model_weights |> dplyr::pull(substr(best_weighting,1,(nchar(best_weighting)-2)))
+
+  if(best_weighting=="Equal_weighted"){
+    ave_coefs<-colSums(coef_mat / nrow(coef_mat) ,na.rm=T)
+
+  }else{
+        model_weights<-
+    ARIMA_forecast$ens$final_model_weights |> dplyr::pull(substr(best_weighting,1,(nchar(best_weighting)-2)))
 
 
   ave_coefs<-colSums(coef_mat *
                        model_weights ,na.rm=T)
+  }
+
+
 
   ave_coefs_non_int_or_ARMA<-ave_coefs[!names(ave_coefs)%in%c("intercept",paste0("ar",1:10),paste0("ma",1:10),paste0("sar",1:10),paste0("sma",1:10),"drift")]
 

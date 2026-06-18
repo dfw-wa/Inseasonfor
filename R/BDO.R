@@ -54,7 +54,7 @@ BDO_dat<-function(use_DWG=TRUE){
 #'
 #' @examples
 fpc_laddersplit<-function (pred_date=NULL,
-                           sdate=as.Date(paste0(lubridate::year(pred_date),"-08-01")),
+                           sdate=(max(ladder_cnts_historic$CountDate)+1),
                            url = "https://www.fpc.org/adults/R_adultcoequeries_laddersplitreport_results_get"
 )
 {
@@ -86,13 +86,20 @@ fpc_laddersplit<-function (pred_date=NULL,
 
 tule_bright_split<-function(pred_date){
 
+
   BDO_dat_obs<-BDO_dat()
 
 
   ladder_cnts<-
-    ladder_cnts_historic |>
-    dplyr::bind_rows(
+    ladder_cnts_historic
+  if(pred_date>max(ladder_cnts_historic$CountDate)){
+    ladder_cnts<-
+      ladder_cnts_historic |>
+      dplyr::bind_rows(
       fpc_laddersplit(pred_date))
+  }
+
+
 
     #   get_adult_ladder_DART(start_year = as.integer(format(Sys.Date(), "%Y")), end_year = as.integer(format(Sys.Date(), "%Y")), proj = "BON") |>
     # pivot_DART_ladder_counts() |>

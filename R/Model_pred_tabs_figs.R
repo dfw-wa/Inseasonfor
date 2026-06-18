@@ -58,7 +58,8 @@ pred_tabs_fig<-function(pred_date,model_results,season_dates){
   cb_palette <- c("#000000",
                   "#E69F00",
                   "#56B4E9",
-                  "#009E73")
+                  "#009E73",
+                  "#CC79A7")
 
   pred_plot<-model_results |> ggplot2::ggplot(ggplot2::aes(x=date,y=predicted_abundance,color=mod_type))+ggplot2::geom_line()+ggplot2::geom_point(size=2.5)+ggplot2::ylab("Predicted total dam count")+ ggplot2::scale_y_continuous(labels = scales::unit_format(suffix="k",scale = 1e-3))+ggplot2::scale_color_manual(values = cb_palette) +ggplot2::theme_gray()+ggplot2::theme(axis.title.x = ggplot2::element_blank(),text = ggplot2::element_text(size=18),legend.position = "top",legend.title = ggplot2::element_blank())
 
