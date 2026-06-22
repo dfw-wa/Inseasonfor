@@ -2,8 +2,8 @@ name: Daily Update and Deployment (Docker)
 
 on:
   workflow_dispatch: {}
-  schedule:
-    - cron: '14 14 * * *'  # 7am Pacific
+#  schedule:
+#    - cron: '14 14 * * *'  # 7am Pacific
 
 permissions:
   contents: write
